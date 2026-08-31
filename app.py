@@ -1,56 +1,58 @@
-from flask import Flask, render_template, request, jsonify
-from google import genai
 import os
+from dotenv import load_dotenv
+from google import genai
+from google.genai import types
 
-app = Flask(__name__)
+# Load environment variables
+load_dotenv()
 
-# Get Gemini API key from environment
-api_key = os.environ.get("GEMINI_API_KEY")
+# Get Gemini API key
+api_key = os.getenv("GEMINI_API_KEY")
 
 if not api_key:
-    raise RuntimeError("GEMINI_API_KEY is not configured.")
+    print("Error: GEMINI_API_KEY was not found in the .env file.")
+    exit()
 
+# Create Gemini client
 client = genai.Client(api_key=api_key)
 
+# Create chat session with instructions
+chat = client.chats.create(
+    model="gemini-2.5-flash",
+    config=types.GenerateContentConfig(
+        system_instruction="""
+You are a helpful AI chatbot.
 
-@app.route("/")
-def home():
-    return render_template("index.html")
+IMPORTANT:
+- Remember and use the previous messages in the conversation.
+- Understand follow-up questions based on the previous conversation.
+- Resolve words such as "it", "its", "they", "them", "this", "that", and "those"
+  using the previous conversation whenever possible.
+- Do not ask the user to clarify something if the previous conversation already
+  provides enough information.
+- Give clear, accurate and helpful answers.
+"""
+    )
+)
 
+print("================================")
+print("       GEMINI AI CHATBOT")
+print("================================")
+print("Type 'exit' to stop the chatbot.\n")
 
-@app.route("/chat", methods=["POST"])
-def chat():
-    data = request.get_json()
-    user_message = data.get("message", "").strip()
+while True:
+    user_message = input("You: ")
 
-    if not user_message:
-        return jsonify({
-            "answer": "Please type a question."
-        })
+    if user_message.lower() == "exit":
+        print("Chatbot: Goodbye! 👋")
+        break
 
     try:
-        response = client.models.generate_content(
-    model="gemini-3.6-flash",
-    contents=user_message
-        )
+        response = chat.send_message(user_message)
+        print("Chatbot:", response.text)
+        print()
 
-        answer = response.text
-
-        return jsonify({
-            "answer": answer
-        })
-
-    except Exception as error:
-        print("Gemini error:", error)
-
-        return jsonify({
-            "answer": "Sorry, I couldn't generate an answer right now. Please try again."
-        }), 500
-
-
-if __name__ == "__main__":
-    app.run(
-        host="0.0.0.0",
-        port=5000,
-        debug=True
-    )
+    except Exception as e:
+        print("Chatbot: Sorry, something went wrong.")
+        print("Error:", e)
+        print()
