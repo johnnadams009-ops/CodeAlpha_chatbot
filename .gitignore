@@ -1,6 +1,4 @@
-node_modules/
-.cache/
-.npm/
-.bashrc
+venv/
 .env
-.gitconfig
+__pycache__/
+*.pyc
