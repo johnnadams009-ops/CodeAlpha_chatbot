@@ -3,7 +3,7 @@
 ## Live Application
 
 [Open ai-chatbot]
-https://ai-chatbot-8exjn36xuhmdgfbnkeiosp.streamlit.app/
+(https://ai-chatbot-8exjn36xuhmdgfbnkeiosp.streamlit.app/)
 # 🤖 AI Assistant
 
 A general-purpose AI chatbot built with Python, Google Gemini API, and Streamlit.
